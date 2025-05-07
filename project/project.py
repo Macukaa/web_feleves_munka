@@ -1,11 +1,14 @@
 from bottle import Bottle, run, route, redirect, request, response, error
 import sqlite3
 import os
+from html import escape
+from hashlib import sha256
 filepath = os.path.abspath("teamfinder.db")
 connection = sqlite3.connect("C:\Webprog\project\database.db")
 cursor = connection.cursor()
 app = Bottle()
-
+def hash_password(password):
+    return sha256(password.encode()).hexdigest()
 @app.route('/')
 def index():
     return '''
@@ -97,7 +100,7 @@ def do_login():
     global username
     global password
     username = request.forms.get('username')
-    password = request.forms.get('password')
+    password = hash_password(request.forms.get('password'))
     return handle_login(username, password)
 
 def handle_login(username, password):
@@ -190,7 +193,7 @@ def register():
 @app.route('/register', method='POST')
 def do_register():
     username = request.forms.get('username')
-    password = request.forms.get('password')
+    password = hash_password(request.forms.get('password'))
     return handle_register(username, password)
 
 def handle_register(username, password):
@@ -233,9 +236,9 @@ def home():
         username = request.get_cookie("username")
         posts_html = ""
         for row in cursor.execute(f"SELECT * FROM posts").fetchall():
-            username = row[0]
-            title = row[1]
-            content = row[2]
+            username = escape(row[0])
+            title = escape(row[1])
+            content = escape(row[2])
             platforms = row[3]
             time = row[4]
             id = row[5]
@@ -424,8 +427,8 @@ def do_signup(id):
     if not islogin:
         return redirect('/login')
     else:
-        username = request.forms.get('username')
-        user_connection = request.forms.get('connection')
+        username = escape(request.forms.get('username'))
+        user_connection = escape(request.forms.get('connection'))
         cursor.execute("INSERT INTO signup (username, connection, id) VALUES (?, ?, ?)", (username, user_connection, id))
         connection.commit()
         return '''
@@ -517,12 +520,12 @@ def do_post():
     if not islogin:
         return redirect('/login')
     else:
-        title = request.forms.get('title')
-        content = request.forms.get('content')
+        title = escape(request.forms.get('title'))
+        content = escape(request.forms.get('content'))
         platforms = request.forms.get('platforms')
         time = request.forms.get('Mikor?')
-        username = request.get_cookie("username")
-        game = request.forms.get('game')
+        username = escape(request.get_cookie("username"))
+        game = escape(request.forms.get('game'))
         cursor.execute("INSERT INTO posts (username, title, content, platforms, time, game) VALUES (?, ?, ?, ?, ?, ?)", (username, title, content, platforms, time, game))
         connection.commit()
         return '''
@@ -720,7 +723,7 @@ def do_edit_profile():
         return redirect('/login')
     else:
         newusername = request.forms.get('username')
-        newpassword = request.forms.get('password')
+        newpassword = hash_password(request.forms.get('password'))
         cursor.execute("UPDATE users SET name=?, password=? WHERE name=?", (newusername, newpassword, username))
         connection.commit()
         return response.delete_cookie("islogin", path="/") ,'''
