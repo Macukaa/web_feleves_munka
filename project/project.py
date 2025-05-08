@@ -3,8 +3,7 @@ import sqlite3
 import os
 from html import escape
 from hashlib import sha256
-filepath = os.path.abspath("teamfinder.db")
-connection = sqlite3.connect("C:\Webprog\project\database.db")
+connection = sqlite3.connect("database.db")
 cursor = connection.cursor()
 app = Bottle()
 def hash_password(password):
