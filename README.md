@@ -7,3 +7,4 @@ https://github.com/Macukaa/web_feleves_munka
 Ekkor már nincs más dolgunk mit vagy parancsként lefuttatni a következőt:
 python startserver.py
 Vagy az általunk választott fejlesztői környezetben futtatni.
+Vagy a legegyszerűbb megynitni a startserver.py-t
